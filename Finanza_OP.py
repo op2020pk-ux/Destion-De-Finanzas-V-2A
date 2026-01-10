@@ -11,6 +11,11 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from fpdf import FPDF
 import os
 
+# ******************** NOTA ******************** #
+    #* """ El presente sistema de escritorio esta diseñado para llevar un control de ingresos y egresos.
+    #* """ Sea (Diario, Semanal, Quincenal, Mensual o Anual).
+
+
 # Intentar establecer el idioma a español para los nombres de los días
 try:
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
@@ -18,21 +23,20 @@ except:
     try:
         locale.setlocale(locale.LC_TIME, 'es_ES')
     except:
-        pass 
-
-# ******************** NOTA ******************** #
-    #* """ El presente sistema de escritorio esta diseñado para llevar un control de ingresos y egresos.
-    #* """ Sea (Diario, Semanal, Quincenal, Mensual o Anual).
+        try:
+            locale.setlocale(locale.LC_TIME, 'Spanish_Spain.1252')
+        except:
+            pass 
 
 # ******************** CONFIGURACION DE COLORES DEL SESTEMA ******************** #
 
-# --- CONFIGURACIÓN DE COLORES ---
 COLOR_BG = "#000000"
 COLOR_PRIMARY = "#2c3e50"
 COLOR_ACCENT = "#3498db"
 COLOR_DANGER = "#e74c3c"
 COLOR_SUCCESS = "#27ae60"
 COLOR_LIGHT = "#f8f9fa"
+COLOR_SKY_BLUE = "#87CEEB" 
 
 
 # ******************** CLASS FINANZAS PRO ******************** #
@@ -47,7 +51,7 @@ class FinanzasPro:
         self.root.geometry("1200x700")
         self.root.configure(bg=COLOR_BG)
         self.root.state('zoomed')
-        #self.root.iconbitmap("Iconos\hacker.ico")
+        self.root.iconbitmap("Iconos\hacker.ico")
         self.conn = sqlite3.connect("control_gastos.db")
         self.cursor = self.conn.cursor()
         
@@ -61,9 +65,19 @@ class FinanzasPro:
         self.conn.commit()
 
         self.meses_dict = {
-            "Todos": 0, "Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, 
-            "Mayo": 5, "Junio": 6, "Julio": 7, "Agosto": 8, 
-            "Septiembre": 9, "Octubre": 10, "Noviembre": 11, "Diciembre": 12
+            "Todos": 0, 
+            "Enero": 1, 
+            "Febrero": 2, 
+            "Marzo": 3, 
+            "Abril": 4, 
+            "Mayo": 5, 
+            "Junio": 6, 
+            "Julio": 7, 
+            "Agosto": 8, 
+            "Septiembre": 9, 
+            "Octubre": 10, 
+            "Noviembre": 11, 
+            "Diciembre": 12
         }
 
         self.style_config()
@@ -94,7 +108,6 @@ class FinanzasPro:
         style.map("Treeview", foreground=[('selected', 'white')], background=[('selected', COLOR_ACCENT)])
 
 # ******************** MODULO PRINCIPAL (PERMITE FUNCIONAR TODOS LOS MODULOS) ******************** #
-
     def create_widgets(self):
         header = tk.Frame(self.root, bg=COLOR_PRIMARY, height=70)
         header.pack(fill="x")
@@ -147,7 +160,6 @@ class FinanzasPro:
             self.root.quit()
 
 # ******************** MODULO (PESTAÑA INICIO) ******************** #
-
     def setup_tab_inicio(self):
         self.canvas_inicio = tk.Canvas(self.tab_inicio, bg="white", highlightthickness=0)
         self.canvas_inicio.pack(fill="both", expand=True)
@@ -179,7 +191,6 @@ class FinanzasPro:
             self.canvas_inicio.create_image(0, 0, anchor="nw", image=self.img_tk)
 
 # ******************** MODULO (REGISTROS) ******************** #
-
     def setup_tab_registros(self):
         form_frame = tk.LabelFrame(self.tab_registros, text=" Nuevo Movimiento / Filtros ", bg="white", padx=15, pady=15)
         form_frame.pack(fill="x", padx=20, pady=10)
@@ -220,14 +231,20 @@ class FinanzasPro:
         self.lbl_total_ingresos = tk.Label(form_frame, text="Total Ingresos: 0,00 Bs.", bg="white", fg=COLOR_SUCCESS, font=("Segoe UI", 10, "bold"))
         self.lbl_total_ingresos.grid(row=3, column=0, columnspan=2, sticky="w", pady=10)
 
+        # SE CAMBIA A COLOR ROJO (COLOR_DANGER)
         self.lbl_total_egresos = tk.Label(form_frame, text="Total Egresos: 0,00 Bs.", bg="white", fg=COLOR_DANGER, font=("Segoe UI", 10, "bold"))
         self.lbl_total_egresos.grid(row=3, column=2, columnspan=2, sticky="w", pady=10)
+
+        self.lbl_total_neto = tk.Label(form_frame, text="Total Restante: 0,00 Bs.", bg="white", fg=COLOR_ACCENT, font=("Segoe UI", 10, "bold"))
+        self.lbl_total_neto.grid(row=3, column=4, columnspan=2, sticky="w", pady=10)
 
         self.actualizar_categorias_principal()
 
         self.tree = ttk.Treeview(self.tab_registros, columns=("ID", "Dia", "Fecha", "Tipo", "Categoría", "Monto"), show='headings', height=15)
-        self.tree.tag_configure("egreso", foreground=COLOR_DANGER)
-        self.tree.tag_configure("ingreso", foreground="black")
+        
+        # CONFIGURACIÓN DE COLORES Y NEGRITA PARA LA TABLA
+        self.tree.tag_configure("egreso", foreground=COLOR_DANGER, font=("Segoe UI", 10, "bold"))
+        self.tree.tag_configure("ingreso", foreground="black", font=("Segoe UI", 10, "bold"))
 
         for col in [("ID", 50), ("Dia", 100), ("Fecha", 120), ("Tipo", 120), ("Categoría", 200), ("Monto", 150)]:
             self.tree.heading(col[0], text=col[0])
@@ -236,8 +253,9 @@ class FinanzasPro:
         self.tree.pack(fill="both", expand=True, padx=20, pady=10)
         self.tree.bind("<Double-1>", self.on_item_double_click)
 
-# ******************** MODULO (GRAFICAS ACTUALIZADO CON HISTORIAL) ******************** #
 
+
+# ******************** MODULO (GRAFICAS ACTUALIZADO CON HISTORIAL) ******************** #
     def setup_tab_graficos(self):
         filter_frame = tk.Frame(self.tab_graficos, bg="white", pady=10)
         filter_frame.pack(fill="x")
@@ -256,15 +274,15 @@ class FinanzasPro:
         self.chart_container = tk.Frame(self.tab_graficos, bg="white")
         self.chart_container.pack(fill="both", expand=True, padx=10, pady=10)
 
+    # Limpiar contenedor y generar gráficos
     def generar_graficos(self):
-        # Limpiar contenedor
         for widget in self.chart_container.winfo_children(): 
             widget.destroy()
 
         mes = self.meses_dict[self.combo_mes_graf.get()]
         anio = self.combo_anio_graf.get()
-        
-        # Filtros de consulta
+
+        # Filtros de consulta SQL        
         filter_sql = " WHERE usuario_id = ?"
         params = [self.usuario_id]
         if mes != 0: filter_sql += " AND mes = ?"; params.append(mes)
@@ -277,7 +295,7 @@ class FinanzasPro:
         if not datos_generales:
             tk.Label(self.chart_container, text="No hay datos registrados para este periodo", bg="white", font=("Segoe UI", 12), fg=COLOR_DANGER).pack(expand=True)
             return
-
+        
         # 2. Obtener Historial por Categoría (Ingresos)
         self.cursor.execute(f"SELECT categoria, SUM(monto) FROM movimientos {filter_sql} AND tipo='Ingreso' GROUP BY categoria ORDER BY SUM(monto) DESC", params)
         ingresos_cat = self.cursor.fetchall()
@@ -310,7 +328,7 @@ class FinanzasPro:
         fig, ax = plt.subplots(figsize=(4, 4))
         labels = list(datos_generales.keys())
         valores = list(datos_generales.values())
-        colores = [COLOR_SUCCESS if l == "Ingreso" else COLOR_DANGER for l in labels]
+        colores = [COLOR_SUCCESS if l == "Ingreso" else COLOR_DANGER for l in labels] # Cambio a rojo en pastel
         ax.pie(valores, labels=labels, autopct='%1.1f%%', startangle=90, colors=colores, wedgeprops={'edgecolor': 'white'})
         ax.set_title("Balance General")
         canvas = FigureCanvasTkAgg(fig, master=col_centro)
@@ -354,12 +372,20 @@ class FinanzasPro:
         for row in self.cursor.fetchall():
             id_v, fec, tip, cat, mon = row
             dia_semana = self.obtener_nombre_dia(fec)
-            if tip == "Ingreso": total_ing += mon
-            else: total_egr += mon
-            tag = "egreso" if tip == "Egreso" else "ingreso"
+            if tip == "Ingreso": 
+                total_ing += mon
+                tag = "ingreso"
+            else: 
+                total_egr += mon
+                tag = "egreso"
+            
+            # Se aplica el tag correspondiente para el color y negrita
             self.tree.insert("", "end", values=(id_v, dia_semana, fec, tip, cat, self.format_bs(mon)), tags=(tag,))
+        
+        restante = total_ing - total_egr
         self.lbl_total_ingresos.config(text=f"Total Ingresos: {self.format_bs(total_ing)} Bs.")
         self.lbl_total_egresos.config(text=f"Total Egresos: {self.format_bs(total_egr)} Bs.")
+        self.lbl_total_neto.config(text=f"Total Restante: {self.format_bs(restante)} Bs.")
 
     def actualizar_anios_disponibles(self):
         self.cursor.execute("SELECT DISTINCT año FROM movimientos WHERE usuario_id = ? ORDER BY año DESC", (self.usuario_id,))
@@ -424,8 +450,9 @@ class FinanzasPro:
             self.cursor.execute("DELETE FROM movimientos WHERE id=?", (id_reg,))
             self.conn.commit(); ventana.destroy(); self.actualizar_tabla(); self.actualizar_anios_disponibles()
 
-# ******************** MODULO (EXPORTAR PDF) ******************** #
 
+
+# ******************** MODULO (EXPORTAR PDF) ******************** #
     def setup_tab_exportar(self):
         container = tk.Frame(self.tab_exportar, bg="white", padx=50, pady=50)
         container.pack(expand=True)
@@ -467,6 +494,7 @@ class FinanzasPro:
             ruta_completa = os.path.join(ruta_base, nombre_archivo)
             pdf.output(ruta_completa); messagebox.showinfo("Éxito", f"PDF generado en: {ruta_completa}")
         except Exception as e: messagebox.showerror("Error", f"No se pudo generar el PDF: {e}")
+
 
 # ******************** MODULO (CONFIGURACION) ******************** #
 
@@ -621,8 +649,8 @@ class FinanzasPro:
         tk.Label(main_frame, text="Versión 2.0 - 2025", font=("Segoe UI", 9, "italic"), bg="white", fg="gray").pack(pady=20)
         tk.Button(main_frame, text="Continuar Administrando", bg=COLOR_SUCCESS, fg="white", font=("Segoe UI", 10, "bold"), width=25, command=lambda: self.notebook.select(self.tab_inicio)).pack(pady=10)
 
-# ******************** MODULO (MANUAL DE USUARIO) ******************** #
 
+# ******************** MODULO (PESTAÑA MANUAL E INFORMACION TECNICA) ******************** #
     def setup_tab_manual(self):
         for widget in self.tab_manual.winfo_children(): widget.destroy()
         container = tk.Frame(self.tab_manual, bg="white")
@@ -647,6 +675,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
 1. REGISTROS: 
    • Ingrese fecha, tipo (Ingreso/Egreso), categoría y monto. 
    • Doble clic en la tabla para editar o borrar registros.
+   • Los INGRESOS se muestran en NEGRO y los EGRESOS en ROJO.
 
 2. GRÁFICOS: 
    • Muestra un balance general en el centro.
@@ -667,11 +696,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
         txt_manual.config(state="disabled")
 
 
-
-
-
-# ******************** MODULO (PESTAÑA INFORMACION) ******************** #
-
+# ******************** MODULO (PESTAÑA INFORMACION TECNICA) ******************** #
     def setup_tab_informacion(self):
         for widget in self.tab_informacion.winfo_children(): widget.destroy()
         container = tk.Frame(self.tab_informacion, bg="white", padx=40, pady=40)
@@ -703,7 +728,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
         tk.Label(container, text="PERFIL DEL DESARROLLADOR", 
                  font=("Segoe UI", 18, "bold"), bg="white", fg=COLOR_ACCENT).pack(pady=(0, 20))
         
-        # Panel de biografía
+        
         bio_frame = tk.Frame(container, bg="#f4f7f6", relief="solid", bd=1, padx=30, pady=25)
         bio_frame.pack(fill="x")
         
@@ -723,7 +748,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
         contact_frame = tk.Frame(container, bg="white", pady=30)
         contact_frame.pack(fill="both")
         
-        # Sub-frames para organización
+        # Sub-frames para organización        
         left_contact = tk.Frame(contact_frame, bg="white")
         left_contact.pack(side="left", fill="both", expand=True)
         
@@ -762,7 +787,6 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
 
 
 
-
 # ******************** LOGIN APP ******************** #
 
 class LoginApp:
@@ -770,7 +794,7 @@ class LoginApp:
         self.root = root
         self.root.title("Acceso al Sistema")
         self.root.geometry("400x550")
-        #self.root.iconbitmap("Iconos\hacker.ico") 
+        self.root.iconbitmap("Iconos\hacker.ico") 
         self.root.configure(bg=COLOR_PRIMARY)
         self.init_db()
         self.create_widgets()
@@ -822,7 +846,7 @@ class LoginApp:
         ventana_rec.title("Recuperar Contraseña"); ventana_rec.geometry("300x200"); ventana_rec.configure(bg="white"); ventana_rec.grab_set()
         tk.Label(ventana_rec, text="Ingrese su nombre de usuario:", bg="white", font=("Segoe UI", 9)).pack(pady=20)
         ent_recuperar = tk.Entry(ventana_rec, font=("Segoe UI", 10), width=25); ent_recuperar.pack(pady=5)
-        tk.Button(ventana_rec, text="Consultar", bg=COLOR_ACCENT, fg="white", command=consultar_db).pack(pady=20)
+        tk.Button(ventana_rec, text="Consultar", bg=COLOR_ACCENT, fg="white").pack(pady=20)
 
 if __name__ == "__main__":
     root = tk.Tk()
