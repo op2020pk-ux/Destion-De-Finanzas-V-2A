@@ -11,6 +11,10 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from fpdf import FPDF
 import os
 
+
+
+
+
 # ******************** NOTA ******************** #
     #* """ El presente sistema de escritorio esta diseñado para llevar un control de ingresos y egresos.
     #* """ Sea (Diario, Semanal, Quincenal, Mensual o Anual).
@@ -28,8 +32,11 @@ except:
         except:
             pass 
 
-# ******************** CONFIGURACION DE COLORES DEL SESTEMA ******************** #
 
+
+
+
+# ******************** CONFIGURACION DE COLORES DEL SESTEMA ******************** #
 COLOR_BG = "#000000"
 COLOR_PRIMARY = "#2c3e50"
 COLOR_ACCENT = "#3498db"
@@ -39,8 +46,10 @@ COLOR_LIGHT = "#f8f9fa"
 COLOR_SKY_BLUE = "#87CEEB" 
 
 
-# ******************** CLASS FINANZAS PRO ******************** #
 
+
+
+# ******************** CLASS FINANZAS PRO ******************** #
 class FinanzasPro:
     def __init__(self, root, usuario_id, nombre_usuario):
         self.root = root
@@ -80,10 +89,26 @@ class FinanzasPro:
             "Diciembre": 12
         }
 
+        # LISTA DE DIAS DE SEMANA
+        self.Dia = [
+            "Lunes", 
+            "Martes", 
+            "Miercoles", 
+            "Jueves", 
+            "Viernes", 
+            "Sabado", 
+            "Domingo"
+            ]
+
         self.style_config()
         self.create_widgets()
 
-        # Inicializar pestañas
+
+
+
+
+# ******************** INICIALIZAR PESTAÑAS ******************** #
+
         self.setup_tab_inicio()
         self.setup_tab_registros()
         self.setup_tab_graficos()
@@ -92,8 +117,7 @@ class FinanzasPro:
         self.setup_tab_agradecimiento()
         self.setup_tab_manual()
         self.setup_tab_informacion()
-        self.setup_tab_creador() 
-        
+        self.setup_tab_creador()         
         self.actualizar_anios_disponibles()
         self.actualizar_tabla()
 
@@ -107,7 +131,12 @@ class FinanzasPro:
                         background=COLOR_PRIMARY, foreground="white")
         style.map("Treeview", foreground=[('selected', 'white')], background=[('selected', COLOR_ACCENT)])
 
+
+
+
+
 # ******************** MODULO PRINCIPAL (PERMITE FUNCIONAR TODOS LOS MODULOS) ******************** #
+
     def create_widgets(self):
         header = tk.Frame(self.root, bg=COLOR_PRIMARY, height=70)
         header.pack(fill="x")
@@ -159,6 +188,10 @@ class FinanzasPro:
             self.conn.close()
             self.root.quit()
 
+
+
+
+
 # ******************** MODULO (PESTAÑA INICIO) ******************** #
     def setup_tab_inicio(self):
         self.canvas_inicio = tk.Canvas(self.tab_inicio, bg="white", highlightthickness=0)
@@ -190,7 +223,12 @@ class FinanzasPro:
             self.canvas_inicio.delete("all")
             self.canvas_inicio.create_image(0, 0, anchor="nw", image=self.img_tk)
 
+
+
+
+
 # ******************** MODULO (REGISTROS) ******************** #
+
     def setup_tab_registros(self):
         form_frame = tk.LabelFrame(self.tab_registros, text=" Nuevo Movimiento / Filtros ", bg="white", padx=15, pady=15)
         form_frame.pack(fill="x", padx=20, pady=10)
@@ -255,7 +293,10 @@ class FinanzasPro:
 
 
 
+
+
 # ******************** MODULO (GRAFICAS ACTUALIZADO CON HISTORIAL) ******************** #
+
     def setup_tab_graficos(self):
         filter_frame = tk.Frame(self.tab_graficos, bg="white", pady=10)
         filter_frame.pack(fill="x")
@@ -328,7 +369,7 @@ class FinanzasPro:
         fig, ax = plt.subplots(figsize=(4, 4))
         labels = list(datos_generales.keys())
         valores = list(datos_generales.values())
-        colores = [COLOR_SUCCESS if l == "Ingreso" else COLOR_DANGER for l in labels] # Cambio a rojo en pastel
+        colores = [COLOR_SUCCESS if l == "Ingreso" else COLOR_DANGER for l in labels]
         ax.pie(valores, labels=labels, autopct='%1.1f%%', startangle=90, colors=colores, wedgeprops={'edgecolor': 'white'})
         ax.set_title("Balance General")
         canvas = FigureCanvasTkAgg(fig, master=col_centro)
@@ -349,10 +390,12 @@ class FinanzasPro:
     def format_bs(self, monto):
         return f"{monto:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
+    # FUNCION ACTUALIZADA PARA USAR LA LISTA DE DIAS PERSONALIZADA
     def obtener_nombre_dia(self, fecha_str):
         try:
             fecha_dt = datetime.strptime(fecha_str, "%d-%m-%Y")
-            return fecha_dt.strftime("%A").capitalize()
+            # Usa el indice del dia (0=Lunes, 6=Domingo) para acceder a self.Dia
+            return self.Dia[fecha_dt.weekday()]
         except:
             return "N/A"
 
@@ -452,6 +495,8 @@ class FinanzasPro:
 
 
 
+
+
 # ******************** MODULO (EXPORTAR PDF) ******************** #
     def setup_tab_exportar(self):
         container = tk.Frame(self.tab_exportar, bg="white", padx=50, pady=50)
@@ -496,6 +541,8 @@ class FinanzasPro:
         except Exception as e: messagebox.showerror("Error", f"No se pudo generar el PDF: {e}")
 
 
+
+
 # ******************** MODULO (CONFIGURACION) ******************** #
 
     def setup_tab_configuracion(self):
@@ -521,7 +568,7 @@ class FinanzasPro:
         content_cfg = tk.Frame(scroll_frame, bg=COLOR_LIGHT, padx=40, pady=20)
         content_cfg.pack(fill="both", expand=True)
 
-        card1 = tk.LabelFrame(content_cfg, text=" 🖼️ Aspecto Visual ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
+        card1 = tk.LabelFrame(content_cfg, text=" Aspecto Visual ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
         card1.pack(fill="x", pady=10)
         
         tk.Label(card1, text="Imagen de fondo para la pestaña Inicio:", bg="white", font=("Segoe UI", 10)).pack(anchor="w")
@@ -539,7 +586,7 @@ class FinanzasPro:
         tk.Button(f_img, text="Examinar", bg=COLOR_PRIMARY, fg="white", command=self.seleccionar_imagen, relief="flat", padx=15).pack(side="left", padx=5)
         tk.Button(f_img, text="Guardar Imagen", bg=COLOR_SUCCESS, fg="white", font=("Segoe UI", 9, "bold"), command=self.actualizar_imagen_fondo, relief="flat", padx=15).pack(side="left")
 
-        card2 = tk.LabelFrame(content_cfg, text=" 📂 Almacenamiento de Reportes ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
+        card2 = tk.LabelFrame(content_cfg, text="Almacenamiento de Reportes ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
         card2.pack(fill="x", pady=10)
         
         tk.Label(card2, text="Carpeta donde se guardarán los PDFs exportados:", bg="white", font=("Segoe UI", 10)).pack(anchor="w")
@@ -557,7 +604,7 @@ class FinanzasPro:
         tk.Button(f_pdf, text="Cambiar Carpeta", bg=COLOR_PRIMARY, fg="white", command=self.seleccionar_ruta_pdf, relief="flat", padx=15).pack(side="left", padx=5)
         tk.Button(f_pdf, text="Fijar Ruta", bg=COLOR_SUCCESS, fg="white", font=("Segoe UI", 9, "bold"), command=self.actualizar_ruta_pdf, relief="flat", padx=15).pack(side="left")
 
-        card3 = tk.LabelFrame(content_cfg, text=" 🔒 Seguridad de la Cuenta ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
+        card3 = tk.LabelFrame(content_cfg, text="Seguridad de la Cuenta ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
         card3.pack(fill="x", pady=10)
         
         f_pass = tk.Frame(card3, bg="white")
@@ -573,7 +620,7 @@ class FinanzasPro:
         
         tk.Button(card3, text="Actualizar Contraseña", bg=COLOR_ACCENT, fg="white", font=("Segoe UI", 10, "bold"), command=self.cambiar_password, relief="flat", pady=7).pack(pady=15, fill="x")
 
-        card4 = tk.LabelFrame(content_cfg, text=" ⚠️ Gestión de Datos ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
+        card4 = tk.LabelFrame(content_cfg, text="Gestión de Datos ", font=("Segoe UI", 11, "bold"), bg="white", padx=20, pady=15, relief="flat", highlightthickness=1, highlightbackground="#ddd")
         card4.pack(fill="x", pady=10)
         
         tk.Label(card4, text="Borrar historial completo de movimientos (Irreversible):", bg="white").pack(side="left")
@@ -629,6 +676,10 @@ class FinanzasPro:
             self.cursor.execute("DELETE FROM movimientos WHERE usuario_id = ?", (self.usuario_id,))
             self.conn.commit(); messagebox.showinfo("Limpieza", "Se han eliminado todos sus registros."); self.actualizar_tabla()
 
+
+
+
+
 # ******************** MODULO (AGRADECIMIENTO) ******************** #
 
     def setup_tab_agradecimiento(self):
@@ -650,7 +701,10 @@ class FinanzasPro:
         tk.Button(main_frame, text="Continuar Administrando", bg=COLOR_SUCCESS, fg="white", font=("Segoe UI", 10, "bold"), width=25, command=lambda: self.notebook.select(self.tab_inicio)).pack(pady=10)
 
 
+
+
 # ******************** MODULO (PESTAÑA MANUAL E INFORMACION TECNICA) ******************** #
+    
     def setup_tab_manual(self):
         for widget in self.tab_manual.winfo_children(): widget.destroy()
         container = tk.Frame(self.tab_manual, bg="white")
@@ -696,7 +750,11 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
         txt_manual.config(state="disabled")
 
 
+
+
+
 # ******************** MODULO (PESTAÑA INFORMACION TECNICA) ******************** #
+    
     def setup_tab_informacion(self):
         for widget in self.tab_informacion.winfo_children(): widget.destroy()
         container = tk.Frame(self.tab_informacion, bg="white", padx=40, pady=40)
@@ -712,6 +770,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
         estado_frame.pack(fill="x", pady=20)
         tk.Label(estado_frame, text="Base de Datos:", font=("Segoe UI", 10), bg="white").pack(side="left")
         tk.Label(estado_frame, text=" CONECTADO ", font=("Segoe UI", 9, "bold"), bg=COLOR_SUCCESS, fg="white").pack(side="left", padx=10)
+
 
 
 
@@ -787,6 +846,7 @@ Este sistema está diseñado para facilitar el seguimiento detallado de sus movi
 
 
 
+
 # ******************** LOGIN APP ******************** #
 
 class LoginApp:
@@ -846,7 +906,12 @@ class LoginApp:
         ventana_rec.title("Recuperar Contraseña"); ventana_rec.geometry("300x200"); ventana_rec.configure(bg="white"); ventana_rec.grab_set()
         tk.Label(ventana_rec, text="Ingrese su nombre de usuario:", bg="white", font=("Segoe UI", 9)).pack(pady=20)
         ent_recuperar = tk.Entry(ventana_rec, font=("Segoe UI", 10), width=25); ent_recuperar.pack(pady=5)
-        tk.Button(ventana_rec, text="Consultar", bg=COLOR_ACCENT, fg="white").pack(pady=20)
+        tk.Button(ventana_rec, text="Consultar", bg=COLOR_ACCENT, fg="white", command=consultar_db).pack(pady=20)
+
+
+
+
+# ********************* INICIO DE LA APLICACIÓN ******************** #
 
 if __name__ == "__main__":
     root = tk.Tk()
